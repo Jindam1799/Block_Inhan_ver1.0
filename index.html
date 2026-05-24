@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>JD CHINESE HSK BLOCK PUZZLE</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="light-flash-overlay"></div>
+
+    <div id="start-screen">
+      <h1 class="blink-text">화면을 터치하세요</h1>
+    </div>
+
+    <div id="lobby-screen" style="display: none">
+      <h1 class="lobby-title">JD CHINESE</h1>
+      <p class="lobby-subtitle">HSK BLOCK PUZZLE</p>
+
+      <div class="mode-buttons">
+        <!-- ★ 클릭 시 바로 게임 시작이 아닌, 급수 선택 모달을 엽니다 ★ -->
+        <button class="mode-btn normal-btn" onclick="openHSKModal('normal')">
+          NORMAL MODE<br />
+        </button>
+        <button class="mode-btn hell-btn" onclick="openHSKModal('hell')">
+          HELL MODE<br />
+        </button>
+        <button class="mode-btn rank-btn" onclick="showRankingScreen('normal')">
+          🏆 명예의 전당 (랭킹)
+        </button>
+      </div>
+    </div>
+
+    <!-- ★ HSK 급수 선택 팝업창 ★ -->
+    <div id="hsk-modal" class="modal" style="z-index: 250">
+      <div
+        class="modal-content"
+        style="
+          border-color: #fff;
+          box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+          max-width: 300px;
+        "
+      >
+        <h3
+          id="hsk-modal-title"
+          style="color: #fff; margin-bottom: 20px; font-size: 16pt"
+        >
+          도전할 급수를 선택하세요
+        </h3>
+        <div class="mode-buttons" style="width: 100%">
+          <button
+            class="option-btn"
+            onclick="selectHSK('hsk4')"
+            style="
+              background: linear-gradient(135deg, #43e97b, #38f9d7);
+              color: #000;
+              box-shadow: 0 0 10px rgba(67, 233, 123, 0.5);
+            "
+          >
+            HSK 4급
+          </button>
+          <button
+            class="option-btn"
+            onclick="selectHSK('hsk5')"
+            style="
+              background: linear-gradient(135deg, #00f2fe, #4facfe);
+              color: #000;
+              box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+            "
+          >
+            HSK 5급
+          </button>
+          <button
+            class="option-btn"
+            onclick="selectHSK('hsk6')"
+            style="
+              background: linear-gradient(135deg, #b06ab3, #4568dc);
+              color: #fff;
+              box-shadow: 0 0 10px rgba(176, 106, 179, 0.5);
+            "
+          >
+            HSK 6급
+          </button>
+        </div>
+        <button
+          class="option-btn"
+          onclick="closeHSKModal()"
+          style="
+            margin-top: 15px;
+            background: transparent;
+            border: 1px solid #888;
+            color: #888;
+          "
+        >
+          취소
+        </button>
+      </div>
+    </div>
+
+    <div id="ranking-screen" style="display: none">
+      <h2
+        style="
+          color: #00ffcc;
+          margin-bottom: 15px;
+          font-size: 24pt;
+          text-shadow: 0 0 10px #00ffcc;
+        "
+      >
+        명예의 전당
+      </h2>
+
+      <div class="ranking-tabs" style="margin-bottom: 10px">
+        <button
+          id="tab-normal"
+          class="tab-btn active"
+          onclick="changeRankMode('normal')"
+        >
+          NORMAL
+        </button>
+        <button id="tab-hell" class="tab-btn" onclick="changeRankMode('hell')">
+          HELL 🔥
+        </button>
+      </div>
+
+      <div
+        class="ranking-level-tabs"
+        style="
+          display: flex;
+          width: 90%;
+          max-width: 400px;
+          margin-bottom: 15px;
+          gap: 5px;
+        "
+      >
+        <button
+          id="tab-rank-hsk4"
+          class="tab-btn active"
+          onclick="changeRankLevel('hsk4')"
+          style="border-radius: 8px"
+        >
+          HSK 4급
+        </button>
+        <button
+          id="tab-rank-hsk5"
+          class="tab-btn"
+          onclick="changeRankLevel('hsk5')"
+          style="border-radius: 8px"
+        >
+          HSK 5급
+        </button>
+        <button
+          id="tab-rank-hsk6"
+          class="tab-btn"
+          onclick="changeRankLevel('hsk6')"
+          style="border-radius: 8px"
+        >
+          HSK 6급
+        </button>
+      </div>
+
+      <div class="ranking-list-container">
+        <ul id="ranking-list"></ul>
+      </div>
+      <button
+        class="option-btn"
+        onclick="returnToLobby()"
+        style="
+          margin-top: 20px;
+          background: linear-gradient(135deg, #4facfe, #00f2fe);
+        "
+      >
+        로비로 돌아가기
+      </button>
+    </div>
+
+    <!-- 인게임 화면 -->
+    <div id="game-container" style="display: none">
+      <header>
+        <div class="score-box">SCORE: <span id="score">0</span></div>
+        <div class="title-box">모드: <span id="mode-display">NORMAL</span></div>
+      </header>
+
+      <div id="combo-display" class="combo-text"></div>
+      <div id="all-clear-display" class="all-clear-text">
+        ALL CLEAR!<br /><span style="font-size: 18pt; color: #fff"
+          >+1000 SCORE</span
+        >
+      </div>
+
+      <div id="quiz-modal" class="modal" style="z-index: 300">
+        <div
+          class="modal-content"
+          style="
+            border-color: #00ffcc;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+          "
+        >
+          <h3 style="color: #00ffcc; margin-bottom: 15px">관문을 통과하라!</h3>
+          <p
+            id="quiz-question"
+            style="
+              font-size: 28pt;
+              font-weight: bold;
+              color: #fff;
+              margin-bottom: 10px;
+            "
+          ></p>
+          <button
+            id="hint-btn"
+            onclick="showHint()"
+            style="
+              background: rgba(0, 255, 204, 0.1);
+              border: 1px solid #00ffcc;
+              color: #00ffcc;
+              padding: 8px 15px;
+              border-radius: 8px;
+              cursor: pointer;
+              margin-bottom: 15px;
+              font-weight: bold;
+              transition: 0.2s;
+            "
+          >
+            💡 병음 힌트 보기
+          </button>
+          <p
+            id="quiz-pinyin"
+            style="
+              display: none;
+              color: #ff00ff;
+              font-size: 16pt;
+              margin-bottom: 20px;
+              font-style: italic;
+              letter-spacing: 2px;
+            "
+          ></p>
+          <div id="quiz-options"></div>
+          <p id="quiz-feedback" class="feedback"></p>
+        </div>
+      </div>
+
+      <!-- 닉네임 입력 팝업 및 기타 모달들 -->
+      <div id="game-over-modal" class="modal" style="z-index: 400">
+        <div
+          class="modal-content"
+          style="
+            border-color: #ff003c;
+            box-shadow: 0 0 30px rgba(255, 0, 60, 0.4);
+          "
+        >
+          <h3
+            style="
+              color: #ff003c;
+              text-shadow: 0 0 10px #ff003c;
+              font-size: 20pt;
+              margin-bottom: 10px;
+            "
+          >
+            GAME OVER
+          </h3>
+          <p
+            id="game-over-stats"
+            style="
+              font-size: 13pt;
+              margin-bottom: 20px;
+              line-height: 1.6;
+              color: #e0e0e0;
+            "
+          ></p>
+          <input
+            type="text"
+            id="nickname-input"
+            placeholder="닉네임 입력 (최대 6자)"
+            maxlength="6"
+            autocomplete="off"
+          />
+          <button
+            class="option-btn"
+            onclick="saveRanking()"
+            style="background: linear-gradient(135deg, #ff0844, #ffb199)"
+          >
+            랭킹 등록 및 확인
+          </button>
+        </div>
+      </div>
+
+      <div id="alert-modal" class="modal" style="z-index: 500">
+        <div
+          class="modal-content"
+          style="
+            border-color: #ffaa00;
+            box-shadow: 0 0 30px rgba(255, 170, 0, 0.4);
+          "
+        >
+          <h3
+            style="
+              color: #ffaa00;
+              text-shadow: 0 0 10px #ffaa00;
+              font-size: 18pt;
+              margin-bottom: 15px;
+            "
+          >
+            알림
+          </h3>
+          <p
+            style="
+              font-size: 14pt;
+              margin-bottom: 25px;
+              line-height: 1.6;
+              color: #fff;
+            "
+          >
+            이름을 남겨주세요!<br /><span style="font-size: 11pt; color: #aaa"
+              >(닉네임을 입력해주세요)</span
+            >
+          </p>
+          <button
+            class="option-btn"
+            onclick="closeAlertModal()"
+            style="
+              background: linear-gradient(135deg, #f6d365, #fda085);
+              color: #000;
+              box-shadow: 0 0 15px rgba(253, 160, 133, 0.5);
+            "
+          >
+            확인
+          </button>
+        </div>
+      </div>
+
+      <div id="board-wrapper">
+        <div id="grid-board"></div>
+      </div>
+
+      <div id="block-dock">
+        <div class="dock-slot" id="slot-0" data-slot="0"></div>
+        <div class="dock-slot" id="slot-1" data-slot="1"></div>
+        <div class="dock-slot" id="slot-2" data-slot="2"></div>
+      </div>
+    </div>
+
+    <div id="drag-overlay"></div>
+
+    <script src="data.js"></script>
+    <script src="scripts.js"></script>
+  </body>
+</html>
